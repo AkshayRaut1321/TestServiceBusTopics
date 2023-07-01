@@ -59,7 +59,7 @@
             {
                 if (singleRadio.Checked)
                     singleSubscription.SendMessagesBatch(serviceBusConnectionString, topicName, messages);
-                else
+                else if (multipleRadio.Checked)
                     multipleSubscription.SendMessagesBatch(serviceBusConnectionString, topicName, messages);
             });
         }
@@ -70,7 +70,7 @@
             {
                 if (singleRadio.Checked)
                     singleSubscription.ReceiveMessages(serviceBusConnectionString, topicName);
-                else
+                else if (multipleRadio.Checked)
                     multipleSubscription.ReceiveMessages(serviceBusConnectionString, topicName);
             });
         }

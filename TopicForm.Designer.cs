@@ -146,7 +146,7 @@
             this.stopReceive.UseVisualStyleBackColor = true;
             this.stopReceive.Click += new System.EventHandler(this.stopReceive_Click);
             // 
-            // Form1
+            // TopicForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -160,7 +160,7 @@
             this.Controls.Add(this.logsDataGridView0);
             this.Controls.Add(this.receive);
             this.Controls.Add(this.send);
-            this.Name = "Form1";
+            this.Name = "TopicForm";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView0)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView1)).EndInit();
