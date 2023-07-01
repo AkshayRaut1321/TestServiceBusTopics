@@ -32,6 +32,8 @@
             this.logsDataGridView0 = new System.Windows.Forms.DataGridView();
             this.receive = new System.Windows.Forms.Button();
             this.send = new System.Windows.Forms.Button();
+            this.asyncStreamRadio = new System.Windows.Forms.RadioButton();
+            this.processorRadio = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView0)).BeginInit();
             this.SuspendLayout();
             // 
@@ -79,11 +81,35 @@
             this.send.UseVisualStyleBackColor = true;
             this.send.Click += new System.EventHandler(this.send_Click);
             // 
+            // asyncStreamRadio
+            // 
+            this.asyncStreamRadio.AutoSize = true;
+            this.asyncStreamRadio.Location = new System.Drawing.Point(30, 123);
+            this.asyncStreamRadio.Name = "asyncStreamRadio";
+            this.asyncStreamRadio.Size = new System.Drawing.Size(133, 24);
+            this.asyncStreamRadio.TabIndex = 15;
+            this.asyncStreamRadio.TabStop = true;
+            this.asyncStreamRadio.Text = "Async Stream";
+            this.asyncStreamRadio.UseVisualStyleBackColor = true;
+            // 
+            // processorRadio
+            // 
+            this.processorRadio.AutoSize = true;
+            this.processorRadio.Location = new System.Drawing.Point(30, 162);
+            this.processorRadio.Name = "processorRadio";
+            this.processorRadio.Size = new System.Drawing.Size(105, 24);
+            this.processorRadio.TabIndex = 16;
+            this.processorRadio.TabStop = true;
+            this.processorRadio.Text = "Processor";
+            this.processorRadio.UseVisualStyleBackColor = true;
+            // 
             // QueueForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(986, 749);
+            this.Controls.Add(this.processorRadio);
+            this.Controls.Add(this.asyncStreamRadio);
             this.Controls.Add(this.clearLogs);
             this.Controls.Add(this.logsDataGridView0);
             this.Controls.Add(this.receive);
@@ -92,6 +118,7 @@
             this.Text = "TestQueue";
             ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView0)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -100,5 +127,7 @@
         private System.Windows.Forms.DataGridView logsDataGridView0;
         private System.Windows.Forms.Button receive;
         private System.Windows.Forms.Button send;
+        private System.Windows.Forms.RadioButton asyncStreamRadio;
+        private System.Windows.Forms.RadioButton processorRadio;
     }
 }

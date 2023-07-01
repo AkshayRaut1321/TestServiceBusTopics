@@ -17,6 +17,7 @@
         string timeStampFormat = "HH:mm:ss.fff";
         private readonly SynchronizationContext synchronizationContext; //context from UI thread
         private TestQueue testQueue;
+        private TestQueueProcessor testQueueProcessor;
 
         public QueueForm()
         {
@@ -24,6 +25,7 @@
             LogsList0 = new List<dynamic>();
             synchronizationContext = SynchronizationContext.Current;
             testQueue = new TestQueue(this);
+            testQueueProcessor = new TestQueueProcessor(this);
         }
 
         private void send_Click(object sender, EventArgs e)
@@ -46,7 +48,10 @@
 
             Task.Run(() =>
             {
-                testQueue.SendMessagesBatch(serviceBusConnectionString, queueName, messages);
+                if (asyncStreamRadio.Checked)
+                    testQueue.SendMessagesBatch(serviceBusConnectionString, queueName, messages);
+                else if (processorRadio.Checked)
+                    testQueueProcessor.SendMessagesBatch(serviceBusConnectionString, queueName, messages);
             });
         }
 
@@ -59,12 +64,12 @@
             logsDataGridView0.Refresh();
         }
 
-        public void DisplayLogsForSingle(ServiceBusReceivedMessage receivedMessage)
+        public void DisplayLogsAsyncStream(ServiceBusReceivedMessage receivedMessage)
         {
             LogsList0.Add(new
             {
                 No = receivedMessage.SequenceNumber,
-                ENo= receivedMessage.EnqueuedSequenceNumber,
+                ENo = receivedMessage.EnqueuedSequenceNumber,
                 Entry = receivedMessage.EnqueuedTime.LocalDateTime.ToString(timeStampFormat),
                 Exit = DateTime.Now.ToString(timeStampFormat)
             });
@@ -83,8 +88,31 @@
         {
             Task.Run(() =>
             {
-                testQueue.ReceiveMessages(serviceBusConnectionString, queueName);
+                if (asyncStreamRadio.Checked)
+                    testQueue.ReceiveMessages(serviceBusConnectionString, queueName);
+                else if (processorRadio.Checked)
+                    testQueueProcessor.ReceiveMessages(serviceBusConnectionString, queueName);
             });
+        }
+
+        public void DisplayLogsForSingle(ProcessMessageEventArgs arg)
+        {
+            LogsList0.Add(new
+            {
+                No = arg.Message.EnqueuedSequenceNumber,
+                ENo = arg.Message.SequenceNumber,
+                Entry = arg.Message.EnqueuedTime.LocalDateTime.ToString(timeStampFormat),
+                Exit = DateTime.Now.ToString(timeStampFormat)
+            });
+
+            BindingSource bs = new BindingSource();
+            bs.DataSource = LogsList0;
+            //Send the update to our UI thread
+            synchronizationContext.Post(new SendOrPostCallback(o =>
+            {
+                logsDataGridView0.DataSource = bs;
+                logsDataGridView0.Refresh();
+            }), null);
         }
     }
 }
