@@ -9,14 +9,14 @@
     using System.Windows.Forms;
     using TestServiceBusTopics.TestingScenarios;
 
-    public partial class Form1 : Form
+    public partial class TopicForm : Form
     {
         string serviceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ge+2CAE0f+xd+clzKonx05m5xZdsAj/Mo+ASbM6KG6A=";
         string topicName = "testsessiontopic";
 
         string timeStampFormat = "HH:mm:ss.fff";
-        SingleSubscription singleSubscription;
-        MultipleSubscription multipleSubscription;
+        TestSingleSubscription singleSubscription;
+        TestMultipleSubscription multipleSubscription;
 
         private readonly SynchronizationContext synchronizationContext; //context from UI thread
 
@@ -25,11 +25,11 @@
         public List<dynamic> LogsList1 { get; set; }
         public List<dynamic> LogsList2 { get; set; }
 
-        public Form1()
+        public TopicForm()
         {
             InitializeComponent();
-            singleSubscription = new SingleSubscription(this);
-            multipleSubscription = new MultipleSubscription(this);
+            singleSubscription = new TestSingleSubscription(this);
+            multipleSubscription = new TestMultipleSubscription(this);
             singleRadio.Checked = true;
             LogsList0 = new List<dynamic>();
             LogsList1 = new List<dynamic>();

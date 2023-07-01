@@ -1,6 +1,6 @@
 ﻿namespace TestServiceBusTopics
 {
-    partial class Form1
+    partial class TopicForm
     {
         /// <summary>
         /// Required designer variable.
