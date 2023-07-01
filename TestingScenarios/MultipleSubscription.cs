@@ -2,25 +2,31 @@
 {
     using Azure.Messaging.ServiceBus;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Forms;
 
-    internal class SingleSubscription
+    internal class MultipleSubscription
     {
-        string subscriptionName = "TestSubscription";
-
-        private readonly SynchronizationContext synchronizationContext = SynchronizationContext.Current; //context from UI thread
+        List<string> subscriptions;
 
         Form1 _form;
-        List<ServiceBusSessionProcessor> processors;
+        ConcurrentDictionary<int, ServiceBusSessionProcessor> processors;
+        private readonly SynchronizationContext synchronizationContext = SynchronizationContext.Current; //context from UI thread
 
-        public SingleSubscription(Form1 form)
+        public MultipleSubscription(Form1 form)
         {
             _form = form;
-            processors = new List<ServiceBusSessionProcessor>();
+            processors = new ConcurrentDictionary<int, ServiceBusSessionProcessor>();
+            subscriptions = new List<string>()
+            {
+                "MultiSub0",
+                "MultiSub1",
+                "MultiSub2"
+            };
         }
 
         public async Task SendMessagesSingles(string serviceBusConnectionString, string topicName, Dictionary<string, int> messages)
@@ -98,7 +104,7 @@
             var parallelOptions = new ParallelOptions();
             parallelOptions.MaxDegreeOfParallelism = 3;
 
-            Parallel.For(0, 3, parallelOptions, async (i) =>
+            Parallel.For(0, subscriptions.Count, parallelOptions, async (index) =>
             {
                 // create the options to use for configuring the processor
                 var serviceBusSessionProcessorOptions = new ServiceBusSessionProcessorOptions()
@@ -116,16 +122,16 @@
                     MaxConcurrentCallsPerSession = 1,
 
                     // Processing can be optionally limited to a subset of session Ids.
-                    SessionIds = { i.ToString() }
+                    SessionIds = { index.ToString() }
                 };
 
-                var serviceBusSessionProcessor = serviceBusClient.CreateSessionProcessor(topicName, subscriptionName, serviceBusSessionProcessorOptions);
+                var serviceBusSessionProcessor = serviceBusClient.CreateSessionProcessor(topicName, subscriptions[index], serviceBusSessionProcessorOptions);
 
                 try
                 {
-                    if (i == 0)
+                    if (index == 0)
                         serviceBusSessionProcessor.ProcessMessageAsync += ServiceBusProcessor0_ProcessMessageAsync;
-                    else if (i == 1)
+                    else if (index == 1)
                         serviceBusSessionProcessor.ProcessMessageAsync += ServiceBusProcessor1_ProcessMessageAsync;
                     else
                         serviceBusSessionProcessor.ProcessMessageAsync += ServiceBusProcessor2_ProcessMessageAsync;
@@ -133,7 +139,7 @@
                     serviceBusSessionProcessor.ProcessErrorAsync += ServiceBusProcessor_ProcessErrorAsync;
 
                     await serviceBusSessionProcessor.StartProcessingAsync();
-                    processors.Add(serviceBusSessionProcessor);
+                    processors.TryAdd(index, serviceBusSessionProcessor);
 
                     await Task.Delay(600000);
                     await serviceBusSessionProcessor.StopProcessingAsync();
@@ -154,6 +160,7 @@
                 await serviceBusClient.DisposeAsync();
             });
         }
+
         private async Task ServiceBusProcessor_ProcessErrorAsync(ProcessErrorEventArgs arg)
         {
             await Task.Run(() =>
@@ -170,7 +177,7 @@
             await Task.Run(() =>
             {
                 //Send the update to our UI thread
-                _form.DisplayLogsForSingle(arg);
+                _form.DisplayLogsForMultiSub0(arg);
             });
         }
 
@@ -179,7 +186,7 @@
             await Task.Run(() =>
             {
                 //Send the update to our UI thread
-                _form.DisplayLogsForSingle(arg);
+                _form.DisplayLogsForMultiSub1(arg);
             });
         }
 
@@ -187,23 +194,25 @@
         {
             await Task.Run(() =>
             {
-                //Send the update to our UI thread
-                _form.DisplayLogsForSingle(arg);
+                _form.DisplayLogsForMultiSub2(arg);
             });
         }
 
         public void StopReceiving()
         {
-            processors.ForEach(async (a) =>
-            {
-                await a.StopProcessingAsync();
+            ParallelOptions po = new ParallelOptions();
+            po.MaxDegreeOfParallelism = 3;
 
-                if (!a.IsProcessing)
+            Parallel.ForEach(processors, po, async (a) =>
+            {
+                await a.Value.StopProcessingAsync();
+
+                if (!a.Value.IsProcessing)
                 {
-                    await a.CloseAsync();
+                    await a.Value.CloseAsync();
                 }
             });
-            processors = new List<ServiceBusSessionProcessor>();
+            processors = new ConcurrentDictionary<int, ServiceBusSessionProcessor>();
         }
     }
 }

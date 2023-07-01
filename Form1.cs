@@ -4,6 +4,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Forms;
     using TestServiceBusTopics.TestingScenarios;
@@ -15,14 +16,25 @@
 
         string timeStampFormat = "HH:mm:ss.fff";
         SingleSubscription singleSubscription;
+        MultipleSubscription multipleSubscription;
+
+        private readonly SynchronizationContext synchronizationContext; //context from UI thread
 
         Dictionary<string, int> messages;
-        ConcurrentDictionary<string, ServiceBusSessionProcessor> serviceBusSessionProcessors = new ConcurrentDictionary<string, ServiceBusSessionProcessor>();
+        public List<dynamic> LogsList0 { get; set; }
+        public List<dynamic> LogsList1 { get; set; }
+        public List<dynamic> LogsList2 { get; set; }
 
         public Form1()
         {
             InitializeComponent();
             singleSubscription = new SingleSubscription(this);
+            multipleSubscription = new MultipleSubscription(this);
+            singleRadio.Checked = true;
+            LogsList0 = new List<dynamic>();
+            LogsList1 = new List<dynamic>();
+            LogsList2 = new List<dynamic>();
+            synchronizationContext = SynchronizationContext.Current;
         }
 
         private void send_Click(object sender, EventArgs e)
@@ -45,7 +57,10 @@
 
             Task.Run(() =>
             {
-                singleSubscription.SendMessagesSingles(serviceBusConnectionString, topicName, messages);
+                if (singleRadio.Checked)
+                    singleSubscription.SendMessagesBatch(serviceBusConnectionString, topicName, messages);
+                else
+                    multipleSubscription.SendMessagesBatch(serviceBusConnectionString, topicName, messages);
             });
         }
 
@@ -53,33 +68,120 @@
         {
             Task.Run(() =>
             {
-                singleSubscription.ReceiveMessages(serviceBusConnectionString, topicName);
+                if (singleRadio.Checked)
+                    singleSubscription.ReceiveMessages(serviceBusConnectionString, topicName);
+                else
+                    multipleSubscription.ReceiveMessages(serviceBusConnectionString, topicName);
             });
         }
 
-        public void DisplayLogs(List<dynamic> LogsList, ProcessSessionMessageEventArgs arg)
+        public void DisplayLogsForSingle(ProcessSessionMessageEventArgs arg)
         {
-            BindingSource bs = new BindingSource();
-            bs.DataSource = LogsList;
-
-            LogsList.Add(new
+            LogsList0.Add(new
             {
                 No = arg.Message.EnqueuedSequenceNumber,
                 SID = arg.SessionId,
                 Entry = arg.Message.EnqueuedTime.LocalDateTime.ToString(timeStampFormat),
                 Exit = DateTime.Now.ToString(timeStampFormat)
             });
-            logsDataGridView0.DataSource = bs;
-            logsDataGridView0.Refresh();
+
+            BindingSource bs = new BindingSource();
+            bs.DataSource = LogsList0;
+            //Send the update to our UI thread
+            synchronizationContext.Post(new SendOrPostCallback(o =>
+            {
+                logsDataGridView0.DataSource = bs;
+                logsDataGridView0.Refresh();
+            }), null);
+        }
+
+        public void DisplayLogsForMultiSub0(ProcessSessionMessageEventArgs arg)
+        {
+            LogsList0.Add(new
+            {
+                No = arg.Message.EnqueuedSequenceNumber,
+                Entry = arg.Message.EnqueuedTime.LocalDateTime.ToString(timeStampFormat),
+                Exit = DateTime.Now.ToString(timeStampFormat)
+            });
+
+            BindingSource bs = new BindingSource();
+            bs.DataSource = LogsList0;
+            //Send the update to our UI thread
+            synchronizationContext.Post(new SendOrPostCallback(o =>
+            {
+                logsDataGridView0.DataSource = bs;
+                logsDataGridView0.Refresh();
+            }), null);
+        }
+
+        public void DisplayLogsForMultiSub1(ProcessSessionMessageEventArgs arg)
+        {
+            LogsList1.Add(new
+            {
+                No = arg.Message.EnqueuedSequenceNumber,
+                Entry = arg.Message.EnqueuedTime.LocalDateTime.ToString(timeStampFormat),
+                Exit = DateTime.Now.ToString(timeStampFormat)
+            });
+
+            BindingSource bs = new BindingSource();
+            bs.DataSource = LogsList1;
+            //Send the update to our UI thread
+            synchronizationContext.Post(new SendOrPostCallback(o =>
+            {
+                logsDataGridView1.DataSource = bs;
+                logsDataGridView1.Refresh();
+            }), null);
+        }
+
+        public void DisplayLogsForMultiSub2(ProcessSessionMessageEventArgs arg)
+        {
+            LogsList2.Add(new
+            {
+                No = arg.Message.EnqueuedSequenceNumber,
+                Entry = arg.Message.EnqueuedTime.LocalDateTime.ToString(timeStampFormat),
+                Exit = DateTime.Now.ToString(timeStampFormat)
+            });
+
+            BindingSource bs = new BindingSource();
+            bs.DataSource = LogsList2;
+            //Send the update to our UI thread
+            synchronizationContext.Post(new SendOrPostCallback(o =>
+            {
+                logsDataGridView2.DataSource = bs;
+                logsDataGridView2.Refresh();
+            }), null);
         }
 
         public void clearLogs_Click(object sender, EventArgs e)
         {
-            singleSubscription.LogsList0 = new List<dynamic>();
+            LogsList0 = new List<dynamic>();
             BindingSource bs0 = new BindingSource();
-            bs0.DataSource = singleSubscription.LogsList0;
+            bs0.DataSource = LogsList0;
             logsDataGridView0.DataSource = bs0;
             logsDataGridView0.Refresh();
+
+            LogsList1 = new List<dynamic>();
+            BindingSource bs1 = new BindingSource();
+            bs1.DataSource = LogsList1;
+            logsDataGridView1.DataSource = bs1;
+            logsDataGridView1.Refresh();
+
+            LogsList2 = new List<dynamic>();
+            BindingSource bs2 = new BindingSource();
+            bs2.DataSource = LogsList2;
+            logsDataGridView2.DataSource = bs2;
+            logsDataGridView2.Refresh();
+        }
+
+        private void stopReceive_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                if (singleRadio.Checked)
+                    singleSubscription.StopReceiving();
+                else
+                    multipleSubscription.StopReceiving();
+            });
         }
     }
 }
