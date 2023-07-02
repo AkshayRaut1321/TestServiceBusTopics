@@ -15,6 +15,7 @@
         QueueForm _form;
         List<ServiceBusProcessor> processors;
         bool withDeadLetter = false;
+        bool withDuplicateDetection = false;
 
         public TestQueueProcessor(QueueForm form)
         {
@@ -68,6 +69,9 @@
                     serviceBusMessage.SessionId = $"{messages.ElementAt(i).Value}";
                     if (withDeadLetter)
                         serviceBusMessage.TimeToLive = TimeSpan.FromSeconds(10);
+
+                    if (withDuplicateDetection)
+                        serviceBusMessage.MessageId = $"{((i % 2) == 0 ? 0 : 1)}";
 
                     if (!serviceBusMessageBatch.TryAddMessage(serviceBusMessage))
                     {

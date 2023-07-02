@@ -12,10 +12,10 @@
     {
         Dictionary<string, int> messages;
         public List<dynamic> LogsList0 { get; set; }
-        string serviceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=SendListen;SharedAccessKey=dam8dnfY4Kexf2eYa/L1Pst96SIqbgqtH+ASbIxWAcs=;EntityPath=testqueue";
+        string serviceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=SendListen;SharedAccessKey=a2Ttqj6FNf0PuTTUuBQNqy0RPP+8wqZvL+ASbB7nHvc=;EntityPath=testqueue";
         string queueName = "TestQueue";
 
-        string deadLetterServiceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=SendListen;SharedAccessKey=dam8dnfY4Kexf2eYa/L1Pst96SIqbgqtH+ASbIxWAcs=;EntityPath=testqueue/$DeadLetterQueue";
+        string deadLetterServiceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=SendListen;SharedAccessKey=a2Ttqj6FNf0PuTTUuBQNqy0RPP+8wqZvL+ASbB7nHvc=;EntityPath=testqueue/$DeadLetterQueue";
         string deadLetterQueueName = "TestQueue/$DeadLetterQueue";
 
         string timeStampFormat = "HH:mm:ss.fff";
