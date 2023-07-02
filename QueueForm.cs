@@ -14,6 +14,10 @@
         public List<dynamic> LogsList0 { get; set; }
         string serviceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=SendListen;SharedAccessKey=dam8dnfY4Kexf2eYa/L1Pst96SIqbgqtH+ASbIxWAcs=;EntityPath=testqueue";
         string queueName = "TestQueue";
+
+        string deadLetterServiceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=SendListen;SharedAccessKey=dam8dnfY4Kexf2eYa/L1Pst96SIqbgqtH+ASbIxWAcs=;EntityPath=testqueue/$DeadLetterQueue";
+        string deadLetterQueueName = "TestQueue/$DeadLetterQueue";
+
         string timeStampFormat = "HH:mm:ss.fff";
         private readonly SynchronizationContext synchronizationContext; //context from UI thread
         private TestQueue testQueue;
@@ -121,6 +125,17 @@
             {
                 if (processorRadio.Checked)
                     testQueueProcessor.StopReceiving();
+            });
+        }
+
+        private void receiveDeadLetter_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                if (asyncStreamRadio.Checked)
+                    testQueue.ReceiveMessages(deadLetterServiceBusConnectionString, deadLetterQueueName);
+                else if (processorRadio.Checked)
+                    testQueueProcessor.ReceiveMessages(deadLetterServiceBusConnectionString, deadLetterQueueName);
             });
         }
     }

@@ -35,12 +35,13 @@
             this.asyncStreamRadio = new System.Windows.Forms.RadioButton();
             this.processorRadio = new System.Windows.Forms.RadioButton();
             this.stopReceive = new System.Windows.Forms.Button();
+            this.receiveDeadLetter = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView0)).BeginInit();
             this.SuspendLayout();
             // 
             // clearLogs
             // 
-            this.clearLogs.Location = new System.Drawing.Point(30, 497);
+            this.clearLogs.Location = new System.Drawing.Point(30, 550);
             this.clearLogs.Name = "clearLogs";
             this.clearLogs.Size = new System.Drawing.Size(146, 86);
             this.clearLogs.TabIndex = 14;
@@ -64,7 +65,7 @@
             // 
             // receive
             // 
-            this.receive.Location = new System.Drawing.Point(30, 212);
+            this.receive.Location = new System.Drawing.Point(30, 228);
             this.receive.Name = "receive";
             this.receive.Size = new System.Drawing.Size(146, 86);
             this.receive.TabIndex = 12;
@@ -106,7 +107,7 @@
             // 
             // stopReceive
             // 
-            this.stopReceive.Location = new System.Drawing.Point(30, 354);
+            this.stopReceive.Location = new System.Drawing.Point(30, 458);
             this.stopReceive.Name = "stopReceive";
             this.stopReceive.Size = new System.Drawing.Size(146, 86);
             this.stopReceive.TabIndex = 17;
@@ -114,11 +115,22 @@
             this.stopReceive.UseVisualStyleBackColor = true;
             this.stopReceive.Click += new System.EventHandler(this.stopReceive_Click);
             // 
+            // receiveDeadLetter
+            // 
+            this.receiveDeadLetter.Location = new System.Drawing.Point(30, 343);
+            this.receiveDeadLetter.Name = "receiveDeadLetter";
+            this.receiveDeadLetter.Size = new System.Drawing.Size(146, 86);
+            this.receiveDeadLetter.TabIndex = 18;
+            this.receiveDeadLetter.Text = "Receive Dead-letter";
+            this.receiveDeadLetter.UseVisualStyleBackColor = true;
+            this.receiveDeadLetter.Click += new System.EventHandler(this.receiveDeadLetter_Click);
+            // 
             // QueueForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(986, 749);
+            this.Controls.Add(this.receiveDeadLetter);
             this.Controls.Add(this.stopReceive);
             this.Controls.Add(this.processorRadio);
             this.Controls.Add(this.asyncStreamRadio);
@@ -142,5 +154,6 @@
         private System.Windows.Forms.RadioButton asyncStreamRadio;
         private System.Windows.Forms.RadioButton processorRadio;
         private System.Windows.Forms.Button stopReceive;
+        private System.Windows.Forms.Button receiveDeadLetter;
     }
 }

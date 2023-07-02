@@ -14,6 +14,7 @@
 
         QueueForm _form;
         List<ServiceBusProcessor> processors;
+        bool withDeadLetter = false;
 
         public TestQueueProcessor(QueueForm form)
         {
@@ -65,6 +66,8 @@
                 {
                     var serviceBusMessage = new ServiceBusMessage(messages.ElementAt(i).Key);
                     serviceBusMessage.SessionId = $"{messages.ElementAt(i).Value}";
+                    if (withDeadLetter)
+                        serviceBusMessage.TimeToLive = TimeSpan.FromSeconds(10);
 
                     if (!serviceBusMessageBatch.TryAddMessage(serviceBusMessage))
                     {
@@ -159,7 +162,7 @@
         {
             //Send the update to our UI thread
             _form.DisplayLogsForSingle(arg);
-            await Task.Delay(60000);
+            await Task.Delay(1000);
             //Thread.Sleep(60000);
             await arg.CompleteMessageAsync(arg.Message);
 
@@ -172,7 +175,7 @@
         {
             //Send the update to our UI thread
             _form.DisplayLogsForSingle(arg);
-            await Task.Delay(60000);
+            await Task.Delay(1000);
             //Thread.Sleep(60000);
             await arg.CompleteMessageAsync(arg.Message);
 
