@@ -12,7 +12,7 @@
     {
         Dictionary<string, int> messages;
         public List<dynamic> LogsList0 { get; set; }
-        string serviceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ge+2CAE0f+xd+clzKonx05m5xZdsAj/Mo+ASbM6KG6A=";
+        string serviceBusConnectionString = "Endpoint=sb://akshayraut.servicebus.windows.net/;SharedAccessKeyName=SendListen;SharedAccessKey=dam8dnfY4Kexf2eYa/L1Pst96SIqbgqtH+ASbIxWAcs=;EntityPath=testqueue";
         string queueName = "TestQueue";
         string timeStampFormat = "HH:mm:ss.fff";
         private readonly SynchronizationContext synchronizationContext; //context from UI thread
@@ -113,6 +113,15 @@
                 logsDataGridView0.DataSource = bs;
                 logsDataGridView0.Refresh();
             }), null);
+        }
+
+        private void stopReceive_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                if (processorRadio.Checked)
+                    testQueueProcessor.StopReceiving();
+            });
         }
     }
 }

@@ -91,50 +91,57 @@
 
         public async Task ReceiveMessages(string serviceBusConnectionString, string queueName)
         {
-            ServiceBusClient serviceBusClient = new ServiceBusClient(serviceBusConnectionString);
-
             var parallelOptions = new ParallelOptions();
-            parallelOptions.MaxDegreeOfParallelism = 3;
+            parallelOptions.MaxDegreeOfParallelism = 2;
 
-            var serviceBusReceiverOptions = new ServiceBusReceiverOptions();
-            serviceBusReceiverOptions.ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete;
-
-            var serviceBusReceiver = serviceBusClient.CreateReceiver(queueName, serviceBusReceiverOptions);
-
-            try
+            Parallel.For(0, 2, parallelOptions, async (i) =>
             {
-                // create the options to use for configuring the processor
-                var serviceBusProcessorOptions = new ServiceBusProcessorOptions()
+                ServiceBusClient serviceBusClient = new ServiceBusClient(serviceBusConnectionString);
+
+                var serviceBusReceiverOptions = new ServiceBusReceiverOptions();
+                serviceBusReceiverOptions.ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete;
+
+                var serviceBusReceiver = serviceBusClient.CreateReceiver(queueName, serviceBusReceiverOptions);
+                try
                 {
-                    // By default after the message handler returns, the processor will complete the message
-                    // If I want more fine-grained control over settlement, I can set this to false.
-                    AutoCompleteMessages = true
-                };
+                    // create the options to use for configuring the processor
+                    var serviceBusProcessorOptions = new ServiceBusProcessorOptions()
+                    {
+                        // By default after the message handler returns, the processor will complete the message
+                        // If I want more fine-grained control over settlement, I can set this to false.
+                        AutoCompleteMessages = false,
+                        ReceiveMode = ServiceBusReceiveMode.PeekLock
+                    };
 
-                var serviceBusSessionProcessor = serviceBusClient.CreateProcessor(queueName, serviceBusProcessorOptions);
-                serviceBusSessionProcessor.ProcessMessageAsync += ServiceBusProcessor_ProcessMessageAsync;
-                serviceBusSessionProcessor.ProcessErrorAsync += ServiceBusProcessor_ProcessErrorAsync;
+                    var serviceBusSessionProcessor = serviceBusClient.CreateProcessor(queueName, serviceBusProcessorOptions);
+                    if (i == 0)
+                        serviceBusSessionProcessor.ProcessMessageAsync += ServiceBusProcessor_ProcessMessageAsync0;
+                    else
+                        serviceBusSessionProcessor.ProcessMessageAsync += ServiceBusProcessor_ProcessMessageAsync1;
 
-                await serviceBusSessionProcessor.StartProcessingAsync();
-                processors.Add(serviceBusSessionProcessor);
+                    serviceBusSessionProcessor.ProcessErrorAsync += ServiceBusProcessor_ProcessErrorAsync;
 
-                await Task.Delay(600000);
-                await serviceBusSessionProcessor.StopProcessingAsync();
+                    await serviceBusSessionProcessor.StartProcessingAsync();
+                    processors.Add(serviceBusSessionProcessor);
 
-                if (!serviceBusSessionProcessor.IsProcessing)
-                {
-                    await serviceBusSessionProcessor.CloseAsync();
+                    await Task.Delay(600000);
+                    await serviceBusSessionProcessor.StopProcessingAsync();
+
+                    if (!serviceBusSessionProcessor.IsProcessing)
+                    {
+                        await serviceBusSessionProcessor.CloseAsync();
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-                await serviceBusReceiver.DisposeAsync();
-            }
-            await serviceBusClient.DisposeAsync();
+                catch (Exception ex)
+                {
+                    throw;
+                }
+                finally
+                {
+                    await serviceBusReceiver.DisposeAsync();
+                }
+                await serviceBusClient.DisposeAsync();
+            });
         }
 
         private async Task ServiceBusProcessor_ProcessErrorAsync(ProcessErrorEventArgs arg)
@@ -148,13 +155,30 @@
             });
         }
 
-        private async Task ServiceBusProcessor_ProcessMessageAsync(ProcessMessageEventArgs arg)
+        private async Task ServiceBusProcessor_ProcessMessageAsync0(ProcessMessageEventArgs arg)
         {
-            await Task.Run(() =>
-            {
-                //Send the update to our UI thread
-                _form.DisplayLogsForSingle(arg);
-            });
+            //Send the update to our UI thread
+            _form.DisplayLogsForSingle(arg);
+            await Task.Delay(60000);
+            //Thread.Sleep(60000);
+            await arg.CompleteMessageAsync(arg.Message);
+
+            //await Task.Run(() =>
+            //{
+            //});
+        }
+
+        private async Task ServiceBusProcessor_ProcessMessageAsync1(ProcessMessageEventArgs arg)
+        {
+            //Send the update to our UI thread
+            _form.DisplayLogsForSingle(arg);
+            await Task.Delay(60000);
+            //Thread.Sleep(60000);
+            await arg.CompleteMessageAsync(arg.Message);
+
+            //await Task.Run(() =>
+            //{
+            //});
         }
 
         public void StopReceiving()

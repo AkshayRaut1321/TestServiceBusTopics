@@ -34,6 +34,7 @@
             this.send = new System.Windows.Forms.Button();
             this.asyncStreamRadio = new System.Windows.Forms.RadioButton();
             this.processorRadio = new System.Windows.Forms.RadioButton();
+            this.stopReceive = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView0)).BeginInit();
             this.SuspendLayout();
             // 
@@ -103,11 +104,22 @@
             this.processorRadio.Text = "Processor";
             this.processorRadio.UseVisualStyleBackColor = true;
             // 
+            // stopReceive
+            // 
+            this.stopReceive.Location = new System.Drawing.Point(30, 354);
+            this.stopReceive.Name = "stopReceive";
+            this.stopReceive.Size = new System.Drawing.Size(146, 86);
+            this.stopReceive.TabIndex = 17;
+            this.stopReceive.Text = "Stop receiving";
+            this.stopReceive.UseVisualStyleBackColor = true;
+            this.stopReceive.Click += new System.EventHandler(this.stopReceive_Click);
+            // 
             // QueueForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(986, 749);
+            this.Controls.Add(this.stopReceive);
             this.Controls.Add(this.processorRadio);
             this.Controls.Add(this.asyncStreamRadio);
             this.Controls.Add(this.clearLogs);
@@ -129,5 +141,6 @@
         private System.Windows.Forms.Button send;
         private System.Windows.Forms.RadioButton asyncStreamRadio;
         private System.Windows.Forms.RadioButton processorRadio;
+        private System.Windows.Forms.Button stopReceive;
     }
 }
